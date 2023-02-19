@@ -9,7 +9,6 @@ export default function ImageGallery({ images }) {
       {images.map(({ id, webformatURL, largeImageURL, tags }) => (
         <ImageGalleryItem
           key={id}
-          id={id}
           srcSmallImg={webformatURL}
           srcLargeImg={largeImageURL}
           alt={tags}
