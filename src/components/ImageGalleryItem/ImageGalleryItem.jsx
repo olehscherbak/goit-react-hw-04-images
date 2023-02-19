@@ -22,7 +22,7 @@ export default function ImageGalleryItem({ srcSmallImg, srcLargeImg, alt }) {
       </li>
       {showModal && (
         <Modal onClose={toggleModal}>
-          <img src={srcLargeImg} alt={alt} />
+          <img src={srcLargeImg} alt={alt} className={css.modalImg} />
         </Modal>
       )}
     </>
