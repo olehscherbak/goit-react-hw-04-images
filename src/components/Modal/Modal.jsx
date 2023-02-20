@@ -5,15 +5,14 @@ import css from './Modal.module.css';
 
 export default function Modal({ onClose, children }) {
   useEffect(() => {
+    const handleKeyDown = evt => {
+      if (evt.code === 'Escape') {
+        onClose();
+      }
+    };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const handleKeyDown = evt => {
-    if (evt.code === 'Escape') {
-      onClose();
-    }
-  };
+  }, [onClose]);
 
   const onClickModalClose = evt => {
     if (evt.currentTarget === evt.target) {
