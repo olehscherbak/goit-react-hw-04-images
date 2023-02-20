@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -8,69 +8,63 @@ import Button from './Button/Button';
 import Loader from './Loader/Loader';
 import imageLoader from '../services/api';
 
-class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    page: 1,
-    isLoading: false,
-    totalHits: 0,
-  };
+export default function App() {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalHits, setTotalHits] = useState(0);
 
-  componentDidUpdate(_, prevState) {
-    const { page, query } = this.state;
-    if (prevState.query !== query || prevState.page !== page) {
-      this.setState({ isLoading: true });
-      imageLoader(query, page)
-        .then(response => {
-          const { hits, totalHits } = response;
-          if (totalHits === 0) {
-            toast.warn('No images match your query!');
-          }
-          this.setState(prevState => ({
-            images: [...prevState.images, ...hits],
-            isLoading: false,
-            totalHits: totalHits,
-          }));
-        })
-        .catch(err => {
-          toast.error('Oops! Something went wrong...');
-          this.setState({ isLoading: false });
-          console.log(err);
-        });
+  useEffect(() => {
+    if (!query) {
+      return;
     }
-  }
 
-  changeQuery = newQuery => {
+    setIsLoading(true);
+    imageLoader(query, page)
+      .then(response => {
+        const { hits, totalHits } = response;
+        if (totalHits === 0) {
+          toast.warn('No images match your query!');
+        }
+        setImages(s => [...s, ...hits]);
+        setIsLoading(false);
+        setTotalHits(totalHits);
+      })
+      .catch(err => {
+        toast.error('Oops! Something went wrong...');
+        setIsLoading(false);
+        console.log(err);
+      });
+  }, [query, page]);
+
+  const changeQuery = newQuery => {
     if (newQuery === '') {
-      this.setState({ images: [], totalHits: 0 });
+      setImages([]);
+      setTotalHits(0);
       return toast.info('Please enter something to search!');
     }
-    if (newQuery !== this.state.query) {
-      this.setState({ query: newQuery, page: 1, images: [], totalHits: 0 });
+    if (newQuery !== query) {
+      setQuery(newQuery);
+      setImages([]);
+      setPage(1);
+      setTotalHits(0);
     }
   };
 
-  handleClick = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const handleClick = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  render() {
-    const { images, isLoading, totalHits } = this.state;
-    return (
-      <div>
-        <Searchbar onSubmit={this.changeQuery} />
-        {images.length > 0 && <ImageGallery images={images} />}
-        {totalHits > images.length && (
-          <Button onClick={this.handleClick} disabled={isLoading} />
-        )}
-        {isLoading && <Loader />}
-        <ToastContainer />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <Searchbar onSubmit={changeQuery} />
+      {images.length > 0 && <ImageGallery images={images} />}
+      {totalHits > images.length && (
+        <Button onClick={handleClick} disabled={isLoading} />
+      )}
+      {isLoading && <Loader />}
+      <ToastContainer />
+    </div>
+  );
 }
-
-export default App;
